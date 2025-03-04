@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot</title>
+    <style>
+        /* Basit stil */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .chat-container {
+            width: 300px;
+            margin: 0 auto;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-box {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .message {
+            margin: 10px 0;
+        }
+
+        .user-message {
+            text-align: right;
+            color: #333;
+        }
+
+        .bot-message {
+            text-align: left;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="message-box" id="messageBox"></div>
+        <input type="text" id="userMessage" class="input-box" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+ async function sendMessage() {
+    const messageBox = document.getElementById('messageBox');
+    const userMessage = document.getElementById('userMessage').value;
+
+    if (userMessage.trim() === "") return;
+
+    // Kullanıcı mesajını ekle
+    messageBox.innerHTML += `<div class="message user-message">${userMessage}</div>`;
+
+    try {
+        // API'ye istek gönder
+        const response = await fetch('http://localhost:5000/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: userMessage })
+        });
+
+        if (!response.ok) {
+            console.log("API isteği başarısız oldu:", response);
+            throw new Error("API isteği başarısız");
+        }
+
+        const data = await response.json();
+        const botMessage = data.botResponse.message || 'Sorry, I didn\'t understand that.';
+
+        // Bot mesajını ekle
+        messageBox.innerHTML += `<div class="message bot-message">${botMessage}</div>`;
+
+        // Mesaj kutusunu kaydır
+        messageBox.scrollTop = messageBox.scrollHeight;
+
+        // Mesaj kutusunu temizle
+        document.getElementById('userMessage').value = '';
+    } catch (error) {
+        console.error("Hata:", error);
+    }
+}
+    </script>
+</body>
+</html>
